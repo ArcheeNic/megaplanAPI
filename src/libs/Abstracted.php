@@ -4,8 +4,24 @@
 
 	use ArcheeNic\MegaplanAPI\ExceptionMegaplan;
 	use Megaplan\SimpleClient\Client;
+	use Objects\Response\Common\Response;
+	use Objects\Response\Common\Status;
 
 	abstract class Abstracted{
+		/**
+		 * Статус. Сбрасывается перед каждым Run
+		 * @var Status|null
+		 */
+		protected $status;
+
+		/**
+		 * @return null|Status
+		 */
+		public function getStatus(){
+			return $this->status;
+		}
+
+
 		/**
 		 * @var Client $Client
 		 */
@@ -23,7 +39,12 @@
 			try{
 				$response=$this->run_process();
 				$this->reset_process();
-				return $response;
+				$this->status=$response->status;
+				if($response->status->code=='ok'){
+					return $response->data;
+				}else{
+					return null;
+				}
 			}catch(ExceptionMegaplan $e){
 
 			}
@@ -39,6 +60,10 @@
 
 			}
 		}
+
+		/**
+		 * @return Response
+		 */
 		abstract protected function run_process();
 		abstract protected function reset_process();
 	}
